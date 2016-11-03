@@ -21,7 +21,7 @@ p {
   right: 0;
 }
 
-#eachImg{
+.eachImg{
   width: 160px;
   margin: 0 auto;
   display: inline-block;
@@ -64,10 +64,9 @@ h1 {
   display: block;
 }
 
-img.images {
+.images {
  width: 150px;
  height: 150px;
- margin: 0px 0px 0 0;
  display: inline-block;
 }
 
