@@ -63,19 +63,20 @@ class QueueApp extends Component {
    */
   thumbnailClick = (link) => {
     if (!Boolean(localStorage.getItem(`${link}${this.props.params.roomName}voted`))) {
-    fetch(HOST + '/increaseVote', {
-      method: "POST",
-      body: JSON.stringify({ link, room: this.props.params.roomName }),
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    }).then(res => res.json()
+      fetch(HOST + '/increaseVote', {
+        method: "POST",
+        body: JSON.stringify({ link, room: this.props.params.roomName }),
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        })
+      }).then(res => res.json()
         .then(() => {
           this.socket.emit('refreshQueue', { room: this.props.params.roomName });
           localStorage.setItem(`${link}${this.props.params.roomName}voted`, 'true')
         }))
-      .catch(error => console.error('Error voting on thumbnail'));
-  }
+        .catch(error => console.error('Error voting on thumbnail'));
+    }
+  }  
 
   playVideo = ()  => { 
     console.log('playing video');
@@ -106,49 +107,48 @@ class QueueApp extends Component {
     }
   }
 
-syncWithAdmin = () => {
-  if (!this.admin) this.player.seekTo(this.state.startPosition)
-}
-
-alertAdminLeaving = (e) => {
-    console.log('leaving');
-  if (this.admin) this.socket.emit('adminLeaving', {room: this.props.params.roomName})
-}
-
-clearRoom = () => {
-  console.log('clearing room');
-   browserHistory.push(`/deadRoom`)
-}
-
-
-handlePlayerEnd = (event) => {
-  if (this.admin) {
-    fetch(HOST + `/getNextVideo/${this.props.params.roomName}`)
-      .then(res => res.json()
-        .then(res => {
-        this.setState({ video: res });
-        this.adminSendVid();
-        this.socket.emit('refreshQueue', { room: this.props.params.roomName });
-      })).catch(error => console.error('Error handling end of video'));
+  syncWithAdmin = () => {
+    if (!this.admin) this.player.seekTo(this.state.startPosition)
   }
-}
+
+  alertAdminLeaving = (e) => {
+    console.log('leaving');
+    if (this.admin) this.socket.emit('adminLeaving', {room: this.props.params.roomName})
+  }
+
+  clearRoom = () => {
+    console.log('clearing room');
+    browserHistory.push(`/deadRoom`)
+  }
+
+  handlePlayerEnd = (event) => {
+    if (this.admin) {
+      fetch(HOST + `/getNextVideo/${this.props.params.roomName}`)
+        .then(res => res.json()
+          .then(res => {
+          this.setState({ video: res });
+          this.adminSendVid();
+          this.socket.emit('refreshQueue', { room: this.props.params.roomName });
+        })).catch(error => console.error('Error handling end of video'));
+    }
+  }
 /**
  * This is the callback for the form component to use in onClick.
  * It makes an ajax request to add a new link when the submit button is clicked.
  */
 
-formClick = (link) => {
-  fetch(HOST + '/addToQueue', {
-    method: "POST",
-    body: JSON.stringify({ link: link, room: this.props.params.roomName }),
-    mode: 'cors',
-    headers: new Headers({
-      'Content-Type': 'application/json'
-    })
-  }).then(res => res.json()
-      .then(() => this.socket.emit('newdata')))
-    .catch(error => console.error('Error adding video to queue'));
-}
+  formClick = (link) => {
+    fetch(HOST + '/addToQueue', {
+      method: "POST",
+      body: JSON.stringify({ link: link, room: this.props.params.roomName }),
+      mode: 'cors',
+      headers: new Headers({
+        'Content-Type': 'application/json'
+      })
+    }).then(res => res.json()
+        .then(() => this.socket.emit('newdata')))
+      .catch(error => console.error('Error adding video to queue'));
+  }
 /**
  * This is where the listeners for this.socket go.
  * on[newData] -> Implies there is a change in data on the backend.
@@ -158,47 +158,48 @@ formClick = (link) => {
  *             The callback will update our roomName in the constructor
  *             with the input value typed into the Home createRoom form.
  */
-componentDidMount() {
-  this.getData();
-  this.admin = this.userIsAdmin();
-  this.socket.emit('room', { roomName: this.props.params.roomName });
-  this.socket.on('newdata', this.getData);
-  this.socket.on('play', this.playVideo);
-  this.socket.on('pause', this.pauseVideo);
-  this.socket.on('newUser', this.adminSendVid);
-  this.socket.on('vidUrl', this.setCurrentVideo);
-  window.addEventListener('unload', (e) => {
-    this.alertAdminLeaving();
-  }, false);
-  this.socket.on('adminLeft', this.clearRoom);
-}
-
-componentWillUnmount() {
-  window.removeEventListener('beforeunload', this.alertAdminLeaving);
-}
-
-render() {
-  let videoUrl;
-  if (this.state.video) {
-    videoUrl = this.state.video;
+  componentDidMount() {
+    this.getData();
+    this.admin = this.userIsAdmin();
+    this.socket.emit('room', { roomName: this.props.params.roomName });
+    this.socket.on('newdata', this.getData);
+    this.socket.on('play', this.playVideo);
+    this.socket.on('pause', this.pauseVideo);
+    this.socket.on('newUser', this.adminSendVid);
+    this.socket.on('vidUrl', this.setCurrentVideo);
+    window.addEventListener('unload', (e) => {
+      this.alertAdminLeaving();
+    }, false);
+    this.socket.on('adminLeft', this.clearRoom);
   }
-  console.log(this.state.queues);
 
-  return (
-    <div>
-      <h1>Room: {this.props.params.roomName}</h1>
-      <Form key={'form-key'} formClick={this.formClick} />
-      <div className="youtube-wrapper">
-        <ReactPlayer id='youtube-component' ref={player => { this.player = player }}
-          url={videoUrl} playing={this.state.playing} controls={true}
-          onPlay={this.adminOnPlay} onPause={this.adminOnPause} onEnded={this.handlePlayerEnd} 
-          onProgress={this.onProgress} progressFrequency={500} onReady = {this.syncWithAdmin}/>
-        <QueueList thumbnailClick={this.thumbnailClick} queues={this.state.queues} />
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.alertAdminLeaving);
+  }
+
+  render() {
+    let videoUrl;
+    if (this.state.video) videoUrl = this.state.video;
+    console.log(this.state.queues);
+
+    return (
+      <div>
+        <h1>Room: {this.props.params.roomName}</h1>
+        <Form key={'form-key'} formClick={this.formClick} />
+        <div className="youtube-wrapper">
+          <ReactPlayer id='youtube-component' ref={player => { this.player = player }}
+            url={videoUrl} playing={this.state.playing} controls={true}
+            onPlay={this.adminOnPlay} onPause={this.adminOnPause} onEnded={this.handlePlayerEnd} 
+            onProgress={this.onProgress} progressFrequency={500} onReady = {this.syncWithAdmin}/>
+          <QueueList thumbnailClick={this.thumbnailClick} queues={this.state.queues} />
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 }
-    }
+
+Queue.propTypes = {
+  params: React.PropTypes.object
+}
 
 export default QueueApp;
- 

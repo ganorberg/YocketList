@@ -22,4 +22,8 @@ const handleClick = (clickEvent) => {
   );
 }
 
+QueueForm.propTypes = {
+  formClick: React.PropTypes.func
+}
+
 export default QueueForm;

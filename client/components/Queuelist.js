@@ -9,11 +9,16 @@ const QueueList = ({ thumbnailClick, queues }) => {
   
   return (
     <div id="queueDiv">
-      <FlipMove easing="cubic-bezier(0, 0.7, 0.8, 0.1)">
+      <FlipMove key={'flippin'} easing="cubic-bezier(0, 0.7, 0.8, 0.1)">
         {validUrls}
       </FlipMove>
     </div>  
   );
 };
+
+QueueList.propTypes = {
+  thumbnailClick: React.PropTypes.func,
+  queues: React.PropTypes.array
+}
 
 export default QueueList;
