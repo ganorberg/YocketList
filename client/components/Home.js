@@ -23,7 +23,7 @@ class Home extends Component {
         'Content-Type': 'application/json'
       })
     }).then(() => {
-      localStorage.setItem(`admin${roomName}`, 'true')
+      sessionStorage.setItem(`admin${roomName}`, 'true')
       browserHistory.push(`/queue/${roomName}`)
     }).catch(() => alert('room name taken'));
     form.roomToCreate.value = '';
