@@ -8,15 +8,16 @@ require('babel-register')({
 });
 require('isomorphic-fetch');
 require('./js/enzyme');
-require('./js/redis');
-require('./js/socketio');
-require('./js/supertest');
+// require('./js/redis');
+// require('./js/socketio');
+// require('./js/supertest');
 
 // Pulled from Airbnb example to use jsdom headless browser
 const jsdom = require('jsdom').jsdom;
 const exposedProperties = ['window', 'navigator', 'document'];
-global.document = jsdom('');
+global.document = jsdom('<!doctype html><html><body></body></html>');
 global.window = document.defaultView;
+// global.window = document.parentWindow;
 Object.keys(document.defaultView).forEach((property) => {
   if (typeof global[property] === 'undefined') {
   exposedProperties.push(property);
@@ -25,12 +26,4 @@ Object.keys(document.defaultView).forEach((property) => {
 });
 global.navigator = {
   userAgent: 'node.js'
-};
-global.window.localStorage = global.window.sessionStorage = {
-    getItem: function (key) {
-        return this[key];
-    },
-    setItem: function (key, value) {
-        this[key] = value;
-    }
 };

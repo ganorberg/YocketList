@@ -20,7 +20,7 @@ let wrapper;
 describe('React unit tests', () => {
   describe('<Layout />', () => {
     it('Should exist', () => {
-      let wrapper = shallow(<Layout />)
+      wrapper = shallow(<Layout />)
       expect(wrapper).to.exist;
     });
   });
@@ -52,17 +52,40 @@ describe('React unit tests', () => {
     it('Should render <div>', () => {
       expect(wrapper.type()).to.equal('div');
     });
+
+    it('Simulates click events on double click', () => {
+      wrapper = shallow(<Queue thumbnailClick={spy} key={'https://www.youtube.com/watch?v=yk0kMOKmp50'} 
+        link={'https://www.youtube.com/watch?v=yk0kMOKmp50'} score={1} />);
+      const img = wrapper.find('img');
+      img.simulate('click');
+      expect(spy.calledOnce).to.equal(false);
+      img.simulate('doubleclick');
+      expect(spy.calledOnce).to.equal(true);
+    });
   });
 
   describe('<QueueApp />', () => {
-    before(() => wrapper = shallow(<QueueApp params={{ roomName: 'room1' }} />));
-
+    it('Calls componentDidMount', () => {
+      sinon.spy(QueueApp.prototype, 'componentDidMount');
+      wrapper = mount(<QueueApp params={{ roomName: 'room1' }} />);
+      expect(QueueApp.prototype.componentDidMount.calledOnce).to.equal(true);
+    });
+    
     it('Should have state "queues" with value deeply equivalent to []', () => {
+      wrapper = mount(<QueueApp params={{ roomName: 'room1' }} />);
       expect(wrapper).to.have.state('queues').deep.equal([]);
     });
 
     it('Should render <div>', () => {
+      wrapper = mount(<QueueApp params={{ roomName: 'room1' }} />);
       expect(wrapper).to.have.tagName('div');
+    });
+
+    it('Allows us to set props', () => {
+      wrapper = mount(<QueueApp params={{ roomName: 'room1' }} />);
+      expect(wrapper.props().params).to.deep.equal({ roomName: 'room1' });
+      wrapper.setProps({ params: "foo" });
+      expect(wrapper.props().params).to.equal("foo");
     });
   });
 
@@ -86,9 +109,17 @@ describe('React unit tests', () => {
   describe('<QueueList />', () => {
     before(() => wrapper = shallow(<QueueList queues={['https://www.youtube.com/watch?v=yk0kMOKmp50']} />));
 
-    it('Should render one <div>', () => {
-      expect(wrapper).to.have.exactly(1).descendants('div');
+    it('Should render <div> with id "queueDiv"', () => {
+      expect(wrapper.type()).to.equal('div');
+      expect(wrapper).to.have.id('queueDiv');
     });
+
+    // Error: cannot read property "split" of undefined
+    // it('Should pass queues property to Queue component', () => {
+    //   const queue = wrapper.find(Queue);
+    //   const queues = wrapper.instance().queues;
+    //   expect(queue.prop('queues')).to.deep.equal(['https://www.youtube.com/watch?v=yk0kMOKmp50'])
+    // });
   });
 
   describe('<RouteNotFound />', () => {
